@@ -9,9 +9,7 @@ defineProps({
 })
 
 const updatePageNumber = (link) => {
-    let pageNumber = link.url.split('=')[1];
-
-    router.visit('/categories?page=' + pageNumber, {
+    router.visit(link.url, {
         preserveScroll: true
     });
 }

@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\MenuRequest;
 use App\Http\Resources\MenuResource;
+use App\Models\Category;
 use App\Models\Menu;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -12,60 +14,52 @@ class MenuController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $menu = MenuResource::collection(Menu::with('categories')->orderByDesc('id')->paginate(10));
+        $query = Menu::with('category')
+        ->when(($request->search), function ($q, $search) {
+            $q->whereAny(['name', 'price'], 'like', '%' . $search . '%')
+            ->orWhereHas('category', function ($query) use ($search) {
+                $query->where('name', 'like', '%' . $search . '%');
+            });
+        })
+        ->paginate(10);
+
+        $menu = MenuResource::collection($query);
 
         return Inertia::render('Menu/Index', [
-            'menu' => $menu
+            'menu' => $menu,
+            'categories' => Category::all()
         ]);
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(MenuRequest $request)
     {
-        //
-    }
+        Menu::create($request->validated());
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
+        return redirect()->route('menu.index');
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(MenuRequest $request, Menu $menu)
     {
-        //
+        $menu->update($request->validated());
+
+        return back();
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(Menu $menu)
     {
-        //
+        $menu->delete();
+
+        return redirect()->route('menu.index');
     }
 }

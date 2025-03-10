@@ -26,12 +26,13 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-Route::resource('categories', CategoryController::class)
-    ->only(['index', 'store', 'destroy'])
-    ->middleware(['auth', 'verified']);
-
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::resource('categories', CategoryController::class)
+        ->only(['index', 'store', 'destroy']);
+    
     Route::resource('menu', MenuController::class)
-    ->only(['index'])
-    ->middleware(['auth', 'verified']);
+        ->only(['index', 'store', 'update', 'destroy']);
+
+});
 
 require __DIR__.'/auth.php';
