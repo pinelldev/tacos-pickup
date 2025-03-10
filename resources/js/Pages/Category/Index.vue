@@ -8,9 +8,12 @@
                 <h2 class="text-xl font-semibold leading-tight text-gray-800">
                     Categories
                 </h2>
-                <button class="rounded bg-slate-600 hover:bg-slate-700 text-white text-center p-2" @click="showModal = true">
+                <PrimaryButton @click="showModal = true">
                     Nueva Categoria
-                </button>
+                </PrimaryButton>
+                <!-- <button class="rounded bg-slate-600 hover:bg-slate-700 text-white text-center p-2" @click="showModal = true">
+                    Nueva Categoria
+                </button> -->
             </div>
         </template>
 
@@ -50,17 +53,14 @@
                     <Pagination :data="categories" />
                 </div>
             </div>
-            <Modal @close="showModal = false" :modal="showModal" title="Agregar categoria">
-                <form class="space-y-4" @submit.prevent="saveCategory">
-                    <div class="justify-center items-center w-3/5 max-h-full gap-6 mb-6">
-                        <label for="name" class="block mb-2 text-sm font-medium">Nombre</label>
-                        <input type="text" id="name" class=" block w-full bg-gray-50 border border-gray-300 text-sm rounded-lg" v-model="form.name">
-                        <div v-if="form.errors.name">{{ form.errors.name }}</div>
+            <Modal :modal="showModal" @onSubmit="saveCategory" @onCancel="resetForm"  title="Agregar categoria">
+                <div class="flex flex-wrap">
+                    <div class="w-full lg:w-1/2 px-4 mb-3">
+                        <InputLabel value="Nombre"/>
+                        <TextInput v-model="form.name"/>
+                        <InputError v-if="form.errors.name" :message="form.errors.name"/>
                     </div>
-                    <button type="submit" class="w-24 text-white bg-blue-500 hover:bg-blue-600 focus:ring-4 font-medium rounded-lg text-sm m-2 px-5 py-2">
-                        Save
-                    </button>
-                </form>
+                </div>
             </Modal>
         </div>
     </AuthenticatedLayout>
@@ -73,6 +73,11 @@ import Modal from "@/Components/Dialogs/Modal.vue";
 import { Head, router, useForm } from '@inertiajs/vue3';
 import { ref } from 'vue';
 import useNotify from '@/use/useNotify';
+import PrimaryButton from '@/Components/PrimaryButton.vue';
+import InputLabel from '@/Components/InputLabel.vue';
+import TextInput from '@/Components/TextInput.vue';
+import ButtonPrimary from '@/Components/Dialogs/BtnPrimary.vue';
+import InputError from '@/Components/InputError.vue';
 
 const props = defineProps({
     categories: {
@@ -89,12 +94,17 @@ const form = useForm({
 
 const notify = useNotify();
 
+function resetForm() {
+    form.reset();
+    showModal.value = false;
+}
 const saveCategory = () => {
     form.post(route('categories.store'), {
         preserveScroll: true,
         onSuccess: () => {
             showModal.value = false;
             form.reset();
+            notify.success('Categoria creada');
         }
     });
 };

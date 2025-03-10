@@ -15,20 +15,13 @@ class CategoryController extends Controller
      */
     public function index()
     {
-        $categories = CategoryResource::collection(Category::orderBy('id', 'desc')->paginate(5));
+        $categories = CategoryResource::collection(Category::paginate(5));
         
         return Inertia::render('Category/Index', [
             'categories' => $categories
         ]);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
 
     /**
      * Store a newly created resource in storage.
@@ -38,30 +31,6 @@ class CategoryController extends Controller
         Category::create($request->validated());
         
         return redirect()->route('categories.index')->with('success', 'Category created successfully');
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
     }
 
     /**
